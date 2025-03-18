@@ -5,6 +5,15 @@ struct ContentView: View {
     @State private var inputText: String = ""
     @State private var predictedEmotion: String = ""
     
+    let emotionEmojis: [String: String] = [
+        "fear": "😢",
+        "joy": "😄",
+        "love": "😄",
+        "anger": "😢",
+        "sadness": "😢",
+        "surprise": "😄"
+    ]
+    
     let model: SentimentAnalysisModel
     
     init() {
@@ -12,27 +21,31 @@ struct ContentView: View {
             let config = MLModelConfiguration()
             self.model = try SentimentAnalysisModel(configuration: config)
         } catch {
-            fatalError("Erro ao carregar o modelo ML: \(error)")
+            fatalError("Error loading ML model: \(error)")
         }
     }
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Análise Sentimental")
+            Text("Sentiment Analysis")
                 .font(.largeTitle)
                 .bold()
             
-            TextField("Digite seu texto aqui...", text: $inputText)
+            TextField("Enter your text here...", text: $inputText)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
             
-            Button("Analisar Emoção") {
+            Button("Analyze Emotion") {
                 predictSentiment()
             }
             .buttonStyle(.borderedProminent)
             
-            Text("Emoção prevista: \(predictedEmotion)")
+            Text("Expected emotion:")
                 .font(.title2)
+                .bold()
+            
+            Text("\(predictedEmotion)")
+                .font(.largeTitle)
                 .bold()
         }
         .padding()
@@ -40,11 +53,12 @@ struct ContentView: View {
     
     func predictSentiment() {
         let prediction = try? model.prediction(text: inputText)
-        predictedEmotion = prediction?.label ?? "Erro na previsão"
+        let emotion = prediction?.label ?? "Forecast error"
+        
+        predictedEmotion = emotionEmojis[emotion] ?? "❓"
     }
 }
 
-@main
 struct SentimentApp: App {
     var body: some Scene {
         WindowGroup {
